@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
@@ -17,10 +18,21 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.29.5",
+    "@jest/globals": "^30.4.1",
     "@tailwindcss/postcss": "^4",
+    "babel-jest": "^30.4.1",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "jest": "^30.4.2",
+    "jest-environment-node": "^30.4.1",
     "tailwindcss": "^4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }
