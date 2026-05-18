@@ -8,10 +8,13 @@ const FALLBACK_SUMMARY =
 
 export default function ResultsPage() {
   const [auditResult, setAuditResult] = useState(null);
+  const [formData, setFormData] = useState(null);
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(true);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [savedAuditId, setSavedAuditId] = useState(null);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -27,10 +30,11 @@ export default function ResultsPage() {
           return;
         }
 
-        const formData = JSON.parse(formDataJson);
+        const parsedFormData = JSON.parse(formDataJson);
+        setFormData(parsedFormData);
 
         // Run audit
-        const result = runAudit(formData);
+        const result = runAudit(parsedFormData);
         setAuditResult(result);
 
         // Simulate 1 second loading
@@ -41,7 +45,7 @@ export default function ResultsPage() {
           const response = await fetch('/api/generate-summary', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ auditResult: result, formData }),
+            body: JSON.stringify({ auditResult: result, formData: parsedFormData }),
           });
 
           if (response.ok) {
@@ -70,9 +74,64 @@ export default function ResultsPage() {
     setShowEmailModal(true);
   };
 
-  const handleEmailSaved = (auditId) => {
-    setSavedAuditId(auditId);
-    setShowEmailModal(false);
+  const handleEmailSubmit = async (email, companyName, role) => {
+    setSaveLoading(true);
+    setSaveError(null);
+
+    try {
+      // Step 1: Save audit
+      const saveResponse = await fetch('/api/save-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auditResult,
+          formData,
+          email,
+          companyName,
+          role,
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        const errorData = await saveResponse.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to save audit');
+      }
+
+      const saveData = await saveResponse.json();
+      const auditId = saveData.id;
+
+      // Step 2: Send email
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            companyName,
+            totalMonthlySavings: auditResult.totalMonthlySavings,
+            auditId,
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Failed to send email:', emailErr);
+        // Continue anyway — audit is saved
+      }
+
+      // Step 3: Set saved ID and close modal
+      setSavedAuditId(auditId);
+      setShowEmailModal(false);
+      setSaveLoading(false);
+    } catch (err) {
+      console.error('Error in email submission:', err);
+      setSaveError(err.message || 'Failed to save your audit');
+      setSaveLoading(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/audit/${savedAuditId}`;
+    navigator.clipboard.writeText(url);
+    alert('Link copied to clipboard!');
   };
 
   if (error) {
@@ -105,6 +164,45 @@ export default function ResultsPage() {
     );
   }
 
+  // Show success state if audit was saved
+  if (savedAuditId) {
+    const handleDownloadPDF = () => {
+      window.location.href = `/api/generate-pdf?id=${savedAuditId}`;
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="text-5xl mb-4">✅</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Report saved!</h2>
+            <p className="text-gray-600 mb-8">Download your audit report:</p>
+
+            <button
+              onClick={handleDownloadPDF}
+              className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition font-medium mb-6 text-lg"
+            >
+              📥 Download PDF Report
+            </button>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-gray-700">
+                Your report has been saved and is ready to download. The PDF contains all your audit details, recommendations, and savings analysis.
+              </p>
+            </div>
+
+            <a
+              href="/"
+              className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-medium"
+            >
+              Run another audit
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <AuditResults
@@ -114,14 +212,16 @@ export default function ResultsPage() {
       />
 
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <EmailCapture
-              auditResult={auditResult}
-              onSaved={handleEmailSaved}
-              onClose={() => setShowEmailModal(false)}
-            />
-          </div>
+        <EmailCapture
+          onClose={() => setShowEmailModal(false)}
+          onSubmit={handleEmailSubmit}
+          totalSavings={auditResult.totalMonthlySavings}
+        />
+      )}
+
+      {saveError && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg">
+          {saveError}
         </div>
       )}
     </div>
