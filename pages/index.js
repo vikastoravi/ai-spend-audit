@@ -1,8 +1,28 @@
 import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import Navbar from '@/components/Navbar';
 import SpendForm from '../components/SpendForm';
 
 export default function Home() {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error getting user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUser();
+  }, []);
 
   const handleFormSubmit = (formData) => {
     // Save form data to localStorage
@@ -12,7 +32,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-white via-gray-50 to-white">
+      <Navbar user={user} />
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-16 md:pt-24 pb-12 md:pb-16 px-4">
         {/* Background decorative elements */}
@@ -22,21 +43,19 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* No Login Required Badge */}
-          <div className="inline-block mb-6 animate-fade-in">
-            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-50 to-emerald-50 text-[#16a34a] border-2 border-[#16a34a] shadow-sm">
-              ✓ No login required • Free forever
-            </span>
+          <div className="mb-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200 shadow-sm">
+            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Instant AI spending clarity with smart recommendations
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight tracking-tight">
-            Find Out If You're Overpaying for <span className="text-[#16a34a]">AI Tools</span>
+            Find Out If You&apos;re Overpaying for <span className="text-[#16a34a]">AI Tools</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed font-medium">
-            Free audit for startups. See exactly where your AI budget is going and how much you could save.
+            Run a fast AI spend audit, unlock savings insights, and see recommendations that impress stakeholders.
           </p>
 
           {/* Stats Section */}
@@ -56,9 +75,25 @@ export default function Home() {
           </div>
 
           {/* CTA Text */}
-          <p className="text-gray-600 text-lg font-medium">
+          <p className="text-gray-600 text-lg font-medium mb-8">
             👇 Start your free audit below
           </p>
+
+          {/* Feature Highlights */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+            <div className="rounded-[1.75rem] bg-white/90 border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Beautiful insights</h3>
+              <p className="text-sm text-gray-600">Visualize spend across every AI tool in your stack.</p>
+            </div>
+            <div className="rounded-[1.75rem] bg-white/90 border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Actionable recommendations</h3>
+              <p className="text-sm text-gray-600">Get smart cost-saving steps you can implement today.</p>
+            </div>
+            <div className="rounded-[1.75rem] bg-white/90 border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast results</h3>
+              <p className="text-sm text-gray-600">Complete your audit in minutes and share it instantly.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -71,7 +106,7 @@ export default function Home() {
               Your AI Spending Breakdown
             </h2>
             <p className="text-gray-600">
-              Tell us about your team and we'll analyze your spending across all tools
+              Tell us about your team and we&apos;ll analyze your spending across all tools
             </p>
           </div>
           
@@ -83,7 +118,7 @@ export default function Home() {
       </div>
 
       {/* Trust Section */}
-      <div className="bg-gradient-to-r from-[#16a34a] to-emerald-600 text-white py-12 px-4 mt-12">
+      <div className="bg-linear-to-r from-[#16a34a] to-emerald-600 text-white py-12 px-4 mt-12">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-lg font-semibold mb-4">
             🔒 Your data is never stored. This audit is completely private.

@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { getSupabaseAdmin } from '../../lib/supabaseAdmin';
 
 // Simple in-memory rate limiting: IP -> { count, resetTime }
 const rateLimitMap = {};
@@ -68,8 +68,13 @@ export default async function handler(req, res) {
       is_high_savings: (auditResult.totalMonthlySavings || 0) > 500,
     };
 
-    // Insert into Supabase
-    const { data, error } = await supabase
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      return res.status(500).json({ error: 'Server is not configured for Supabase admin access.' });
+    }
+
+    // Insert into Supabase using server-side admin credentials
+    const { data, error } = await supabaseAdmin
       .from('audits')
       .insert([auditData])
       .select('id')
