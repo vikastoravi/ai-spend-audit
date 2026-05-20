@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useSupabaseAuth } from '@/lib/useSupabaseAuth'
 import withGuest from '@/lib/withGuest'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { user, isLoading: authLoading } = useSupabaseAuth()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,6 +47,12 @@ export default function SignupPage() {
     setFieldErrors(errors)
     return Object.keys(errors).length === 0
   }
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/dashboard')
+    }
+  }, [authLoading, user, router])
 
   const handleSignup = async (e) => {
     e.preventDefault()

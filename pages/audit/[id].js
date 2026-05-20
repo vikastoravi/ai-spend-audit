@@ -1,12 +1,39 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSupabaseAuth } from '@/lib/useSupabaseAuth';
 import { supabase } from '../../lib/supabase';
 import ToolRow from '../../components/ToolRow';
 
 export default function AuditPage({ audit, domain }) {
+  const router = useRouter()
+  const { user, isLoading: authLoading } = useSupabaseAuth()
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
+    }
+  }, [authLoading, router, user])
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
+        <div className="text-center px-6 py-10 bg-white rounded-3xl shadow-xl border border-gray-200">
+          <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-700">Checking login status…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
   if (!audit) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
         <div className="text-center px-6 py-10 bg-white rounded-3xl shadow-xl border border-gray-200">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Audit not found</h1>
           <p className="text-gray-600 mb-8">This audit has been deleted or doesn&apos;t exist.</p>
@@ -40,7 +67,7 @@ export default function AuditPage({ audit, domain }) {
         <meta name="description" content="Free AI spend audit — see if your team is overpaying for AI tools." />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-100 to-indigo-100">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-slate-100 to-indigo-100">
         <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">
@@ -54,8 +81,8 @@ export default function AuditPage({ audit, domain }) {
             </a>
           </div>
 
-          <div className="rounded-[2rem] bg-white shadow-2xl border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-10 text-white">
+          <div className="rounded-4xl bg-white shadow-2xl border border-gray-200 overflow-hidden">
+            <div className="bg-linear-to-r from-green-600 to-emerald-600 px-8 py-10 text-white">
               <div className="max-w-3xl mx-auto text-center">
                 <p className="uppercase tracking-[0.3em] text-sm font-semibold text-green-100 mb-4">AI Spend Audit Report</p>
                 <h1 className="text-5xl font-bold tracking-tight mb-4">
@@ -253,18 +280,6 @@ function copyAuditLink(id) {
 
 export async function getServerSideProps({ params, req }) {
   const { id } = params;
-
-  // Enforce server-side auth: if there are no auth-related cookies, redirect to login
-  const cookieHeader = req.headers.cookie || '';
-  const hasAuthCookie = /supabase|sb-access-token|supabase-auth-token|sb:token|supabase.auth.token/i.test(cookieHeader);
-  if (!hasAuthCookie) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
 
   const protocol = req.headers['x-forwarded-proto'] || 'http';
   const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
+import { useSupabaseAuth } from '@/lib/useSupabaseAuth';
 import { useToast } from '@/lib/ToastContext';
 import { runAudit } from '@/lib/auditEngine';
 import AuditResults from '@/components/AuditResults';
@@ -25,20 +25,19 @@ export default function ResultsPage() {
   const { showToast } = useToast();
   const router = useRouter();
 
+  const { user, isLoading: authLoading } = useSupabaseAuth();
+
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     const loadAudit = async () => {
-      // Require authentication before showing results
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          router.push('/login');
-          return;
-        }
-      } catch (err) {
-        console.error('Auth check failed:', err);
-        router.push('/login');
-        return;
-      }
       try {
         setLoading(true);
 
@@ -84,7 +83,7 @@ export default function ResultsPage() {
     };
 
     loadAudit();
-  }, [router]);
+  }, [authLoading, router, user]);
 
   const handleCaptureEmail = () => {
     setShowEmailModal(true);
@@ -195,6 +194,26 @@ export default function ResultsPage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-slate-100">
+        <div className="text-center">
+          <div className="animate-spin h-14 w-14 rounded-full border-4 border-green-600 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600 mt-4 text-lg">Checking session…</p>
+        </div>
+      </div>
+    )
+  }
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-slate-100 px-4">
+        <div className="text-center">
+          <div className="animate-spin h-14 w-14 rounded-full border-4 border-green-600 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600 mt-4 text-lg">Checking session and loading your audit…</p>
+        </div>
+      </div>
+    );
+  }
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-slate-100 px-4">

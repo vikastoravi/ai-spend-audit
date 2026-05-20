@@ -1,37 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { useSupabaseAuth } from '@/lib/useSupabaseAuth'
 import Navbar from '@/components/Navbar'
 import SpendForm from '@/components/SpendForm'
 
 export default function NewAuditPage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
+  const { user, isLoading: authLoading } = useSupabaseAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [authLoading, setAuthLoading] = useState(true)
 
-  // Check authentication on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser()
-        if (!currentUser) {
-          router.push('/login')
-          return
-        }
-        setUser(currentUser)
-      } catch (err) {
-        console.error('Auth error:', err)
-        router.push('/login')
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !user) {
+      router.push('/login')
     }
+  }, [authLoading, router, user])
 
-    checkAuth()
-  }, [router])
+  if (authLoading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking session...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleAuditSubmit = async (formData) => {
     if (!user?.id) {
@@ -43,6 +38,14 @@ export default function NewAuditPage() {
     setError('')
 
     try {
+      // Persist the input so the results page (or client) can read it
+      try {
+        localStorage.setItem('audit-result-input', JSON.stringify(formData))
+      } catch (e) {
+        // ignore localStorage errors (e.g., SSR or private mode)
+        console.warn('Could not persist audit input to localStorage', e)
+      }
+
       // Call the create audit API
       const response = await fetch('/api/create-audit', {
         method: 'POST',
@@ -62,32 +65,23 @@ export default function NewAuditPage() {
 
       const result = await response.json()
 
-      // Redirect to audit results page
+      // Save the new audit id so the results page can reference it if needed,
+      // but keep users on the consistent results page flow.
       if (result.audit_id) {
-        router.push(`/audit/${result.audit_id}`)
-      } else {
-        throw new Error('No audit ID returned')
+        try {
+          localStorage.setItem('latest-audit-id', result.audit_id)
+        } catch (e) {
+          console.warn('Could not persist latest audit ID', e)
+        }
+        router.replace('/results')
+        return
       }
+      throw new Error('No audit ID returned')
     } catch (err) {
       console.error('Audit submission error:', err)
       setError(err.message || 'Failed to run audit. Please try again.')
       setLoading(false)
     }
-  }
-
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
   }
 
   return (

@@ -1,65 +1,61 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/lib/ToastContext'
+import { useSupabaseAuth } from '@/lib/useSupabaseAuth'
 import Navbar from '@/components/Navbar'
 import SavingsSummary from '@/components/Dashboard/SavingsSummary'
 import SavingsChart from '@/components/Dashboard/SavingsChart'
 import AuditHistory from '@/components/Dashboard/AuditHistory'
 import DashboardSkeleton from '@/components/Dashboard/DashboardSkeleton'
 
-export default function Dashboard({ user: initialUser, audits: initialAudits = [], profile: initialProfile }) {
+export default function Dashboard({ audits: initialAudits = [], profile: initialProfile }) {
   const router = useRouter()
   const { showToast } = useToast()
-  const [user, setUser] = useState(initialUser)
+  const { user, isLoading: authLoading } = useSupabaseAuth()
   const [audits, setAudits] = useState(initialAudits)
   const [profile, setProfile] = useState(initialProfile)
-  const [loading, setLoading] = useState(!initialUser)
+  const [loading, setLoading] = useState(true)
 
-  // Check auth on mount (client-side fallback)
   useEffect(() => {
-    const checkAuth = async () => {
+    if (authLoading) {
+      return
+    }
+
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const fetchData = async () => {
       try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser()
-        
-        if (!currentUser) {
-          router.push('/login')
-          return
-        }
-        
-        setUser(currentUser)
-        
-        // Fetch audits and profile if not already loaded
-        if (!initialUser) {
-          const [auditsRes, profileRes] = await Promise.all([
-            supabase
-              .from('audits')
-              .select('*')
-              .eq('user_id', currentUser.id)
-              .order('created_at', { ascending: false }),
-            supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', currentUser.id)
-              .single(),
-          ])
-          
-          setAudits(auditsRes.data || [])
-          setProfile(profileRes.data)
-        }
+        setLoading(true)
+
+        const [auditsRes, profileRes] = await Promise.all([
+          supabase
+            .from('audits')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single(),
+        ])
+
+        setAudits(auditsRes.data || [])
+        setProfile(profileRes.data)
       } catch (err) {
-        console.error('Auth check error:', err)
-        router.push('/login')
+        console.error('Dashboard fetch error:', err)
       } finally {
         setLoading(false)
       }
     }
 
-    if (!initialUser) {
-      checkAuth()
-    }
-  }, [initialUser, router])
+    fetchData()
+  }, [authLoading, router, user])
 
   // Get time-based greeting
   const getGreeting = () => {
@@ -116,7 +112,7 @@ export default function Dashboard({ user: initialUser, audits: initialAudits = [
     }
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return <DashboardSkeleton />
   }
 

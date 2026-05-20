@@ -140,7 +140,11 @@ Add screenshots to `/public` and reference them here:
 
 ![Dashboard placeholder](/public/screenshots/dashboard.png)
 
-![Audit results placeholder](/public/screenshots/results.png)
+![Audit results placeholder](/public/screenshots/results page.png)
+
+![home page placeholder](/public/screenshots/home page.png)
+
+
 
 Replace the placeholder images with real screenshots before publishing.
 
