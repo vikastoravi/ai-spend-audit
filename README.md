@@ -136,13 +136,13 @@ Key files:
 
 ## Screenshots 🖼️
 
-Add screenshots to `/public` and reference them here:
+Add screenshots to `public/screenshots` and reference them here:
 
-![Dashboard placeholder](/public/screenshots/dashboard.png)
+![Dashboard placeholder](public/screenshots/dashboard.png)
 
-![Audit results placeholder](/public/screenshots/results page.png)
+![Audit results placeholder](public/screenshots/results.png)
 
-![home page placeholder](/public/screenshots/home page.png)
+![Home page placeholder](public/screenshots/home-page.png)
 
 
 
