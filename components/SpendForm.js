@@ -12,9 +12,11 @@ export default function SpendForm({ onSubmit }) {
     if (saved) {
       try {
         const data = JSON.parse(saved);
+        /* eslint-disable react-hooks/set-state-in-effect */
         setTeamSize(data.teamSize || '');
         setUseCase(data.useCase || '');
         setTools(data.tools || []);
+        /* eslint-enable react-hooks/set-state-in-effect */
       } catch (e) {
         console.error('Failed to load form state:', e);
       }
@@ -133,7 +135,7 @@ export default function SpendForm({ onSubmit }) {
         {tools.length === 0 ? (
           <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
             <p className="text-gray-500 text-lg font-medium">No tools added yet.</p>
-            <p className="text-gray-400 text-sm mt-1">Click "Add Tool" below to get started.</p>
+            <p className="text-gray-400 text-sm mt-1">Click &quot;Add Tool&quot; below to get started.</p>
           </div>
         ) : (
           <div className="space-y-4 mb-6">

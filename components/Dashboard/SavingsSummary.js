@@ -71,7 +71,7 @@ export default function SavingsSummary({ audits = [] }) {
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6"
+          className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transform transition-all duration-150 p-6"
         >
           {/* Icon */}
           <div className={`${card.iconBg} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>

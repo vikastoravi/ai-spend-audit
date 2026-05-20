@@ -91,12 +91,11 @@ export default function AuditHistory({ audits = [], onDelete = () => {} }) {
         <p className="text-gray-600 mb-6">
           Run your first audit to see your AI spend breakdown
         </p>
-        <Link
-          href="/audit/new"
-          className="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-        >
-          Run Your First Audit →
-        </Link>
+        <div>
+          <Link href="/audit/new" className="text-green-600 font-medium hover:underline">
+            Run your first audit →
+          </Link>
+        </div>
       </div>
     )
   }

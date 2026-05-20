@@ -1,152 +1,72 @@
 import ToolRow from './ToolRow';
 
-export default function AuditResults({ auditResult, summary, onCaptureEmail }) {
+export default function AuditResults({ auditResult, summary }) {
   const { recommendations, totalMonthlySavings, totalAnnualSavings, isOptimal } = auditResult;
 
+  const annualSavingsValue = totalAnnualSavings || totalMonthlySavings * 12;
   const isOptimized = totalMonthlySavings < 100 || isOptimal;
-  const showVKGroupCTA = totalMonthlySavings > 500;
-
-  const handleCopyLink = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      alert('Audit link copied to clipboard!');
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white">
-      {/* Hero Section */}
-      <section className="pt-12 md:pt-20 pb-12 md:pb-16 px-4 text-center">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-            Your AI Spend Audit
-          </h1>
-
-          {isOptimized ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-8 mb-8">
-              <p className="text-3xl md:text-4xl font-bold text-green-600">
-                You're already spending well on AI tools 🎉
-              </p>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-8 md:p-12 mb-8">
-              <div className="text-5xl md:text-6xl font-bold text-green-600 mb-3">
-                ${totalMonthlySavings.toLocaleString()}/month
-              </div>
-              <div className="text-xl md:text-2xl text-gray-600">
-                That's ${totalAnnualSavings.toLocaleString()}/year
-              </div>
-            </div>
-          )}
-
-          {/* AI Summary */}
-          {summary && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
-              <p className="text-gray-700 text-lg leading-relaxed">
-                {summary}
-              </p>
-            </div>
-          )}
+    <div className="bg-white rounded-4xl shadow-2xl border border-gray-200 overflow-hidden">
+      <section className="px-6 py-10 lg:px-10 lg:py-12">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Audit insights that move the needle
+          </h2>
+          <p className="mx-auto max-w-2xl text-base text-gray-600 leading-7">
+            This report highlights the best ways to reduce AI spend while keeping tool access stable for your team.
+          </p>
         </div>
       </section>
 
-      {/* VKGROUP CTA Section */}
-      {showVKGroupCTA && (
-        <section className="py-12 md:py-16 px-4 bg-gradient-to-r from-green-500 to-emerald-500">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white bg-opacity-10 backdrop-blur rounded-lg p-8 text-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                You could save even more with VKGROUP discounted AI credits
-              </h2>
-              <a
-                href="https://credex.rocks"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-green-600 font-semibold px-6 md:px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Book a Free VKGROUP Consultation →
-              </a>
-            </div>
+      <div className="grid gap-4 md:grid-cols-3 px-6 pb-10 lg:px-10">
+        <div className="rounded-3xl bg-slate-50 p-5 text-center">
+          <p className="text-sm uppercase tracking-[0.24em] text-slate-500 mb-3">Monthly savings</p>
+          <p className="text-3xl font-semibold text-slate-900">${totalMonthlySavings.toLocaleString()}</p>
+        </div>
+        <div className="rounded-3xl bg-slate-50 p-5 text-center">
+          <p className="text-sm uppercase tracking-[0.24em] text-slate-500 mb-3">Annual impact</p>
+          <p className="text-3xl font-semibold text-slate-900">${annualSavingsValue.toLocaleString()}</p>
+        </div>
+        <div className="rounded-3xl bg-slate-50 p-5 text-center">
+          <p className="text-sm uppercase tracking-[0.24em] text-slate-500 mb-3">Optimization status</p>
+          <p className={`text-3xl font-semibold ${isOptimized ? 'text-emerald-600' : 'text-slate-900'}`}>
+            {isOptimized ? 'Aligned' : 'Actionable'}
+          </p>
+        </div>
+      </div>
+
+      {summary && (
+        <div className="px-6 pb-10 lg:px-10">
+          <div className="rounded-3xl bg-blue-50 border border-blue-100 p-6">
+            <p className="text-base text-slate-700 leading-7">{summary}</p>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* Per-Tool Breakdown Section */}
-      <section className="py-12 md:py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-            Per-Tool Breakdown
-          </h2>
-
-          <div className="space-y-4">
-            {recommendations && recommendations.length > 0 ? (
-              recommendations.map((rec, idx) => (
-                <ToolRow
-                  key={idx}
-                  toolName={rec.tool}
-                  currentPlan={rec.currentPlan}
-                  currentSpend={rec.currentSpend}
-                  recommendedAction={rec.recommendedAction}
-                  monthlySavings={rec.monthlySavings}
-                  annualSavings={rec.annualSavings}
-                  reason={rec.reason}
-                  status={rec.status}
-                />
-              ))
-            ) : (
-              <p className="text-gray-600 text-center py-8">
-                No recommendations at this time.
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Email Capture Section */}
-      <section className="py-12 md:py-16 px-4 bg-gray-50">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            {totalMonthlySavings > 500
-              ? 'Save this report and we\'ll connect you with VKGROUP'
-              : 'Get notified when new optimizations apply to your stack'}
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {totalMonthlySavings > 500
-              ? 'Our team will reach out with personalized recommendations and exclusive deals.'
-              : 'We\'ll email you when we add new tools or detect changes in your spending.'}
-          </p>
-          <button
-            onClick={onCaptureEmail}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-          >
-            Get My Report
-          </button>
-        </div>
-      </section>
-
-      {/* Share Section */}
-      <section className="py-12 md:py-16 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-            Share your audit
-          </h2>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
-            <button
-              onClick={handleCopyLink}
-              className="inline-flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold px-6 md:px-8 py-3 rounded-lg transition-colors"
-            >
-              📋 Copy Link
-            </button>
-            <button
-              onClick={onCaptureEmail}
-              className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 md:px-8 py-3 rounded-lg transition-colors"
-            >
-              📥 Download PDF
-            </button>
-          </div>
+      <section className="px-6 pb-12 lg:px-10">
+        <h3 className="text-2xl font-semibold text-gray-900 mb-6">Tool recommendations</h3>
+        <div className="space-y-4">
+          {recommendations && recommendations.length > 0 ? (
+            recommendations.map((rec, idx) => (
+              <ToolRow
+                key={idx}
+                toolName={rec.tool}
+                currentPlan={rec.currentPlan}
+                currentSpend={rec.currentSpend}
+                recommendedAction={rec.recommendedAction}
+                monthlySavings={rec.monthlySavings}
+                annualSavings={rec.annualSavings}
+                reason={rec.reason}
+                status={rec.status}
+              />
+            ))
+          ) : (
+            <div className="rounded-3xl border border-gray-200 bg-slate-50 p-8 text-center">
+              <p className="text-lg font-semibold text-slate-900 mb-2">No recommendations at this time</p>
+              <p className="text-slate-600">Your current AI stack appears efficient based on the information provided.</p>
+            </div>
+          )}
         </div>
       </section>
     </div>

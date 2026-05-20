@@ -1,4 +1,4 @@
-export default {
+const jestConfig = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
@@ -7,3 +7,5 @@ export default {
     '^.+\\.jsx?$': ['babel-jest', { presets: ['@babel/preset-env'] }],
   },
 };
+
+export default jestConfig;

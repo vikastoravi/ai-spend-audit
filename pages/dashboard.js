@@ -58,8 +58,6 @@ export default function Dashboard({ user: initialUser, audits: initialAudits = [
 
     if (!initialUser) {
       checkAuth()
-    } else {
-      setLoading(false)
     }
   }, [initialUser, router])
 
@@ -132,22 +130,22 @@ export default function Dashboard({ user: initialUser, audits: initialAudits = [
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-2">
               {getGreeting()}, {getFirstName()}! 👋
             </h1>
-            <p className="text-gray-600">{getTodayDate()}</p>
+            <p className="text-gray-600 md:text-lg">{getTodayDate()}</p>
           </div>
           <Link
             href="/audit/new"
-            className="mt-4 md:mt-0 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors inline-block"
+            className="mt-4 md:mt-0 inline-flex items-center gap-2 px-5 py-3 bg-linear-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-full shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-green-200"
           >
-            Run New Audit
+            📈 Run New Audit
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Savings Summary */}
@@ -171,23 +169,23 @@ export default function Dashboard({ user: initialUser, audits: initialAudits = [
 
           {/* Sidebar - Quick Tips */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-20">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">💡 Quick Tips</h3>
+            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-20 space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 Quick Tips</h3>
               <ul className="space-y-4">
                 <li className="flex gap-3">
-                  <span className="flex-shrink-0 text-xl">📅</span>
+                  <span className="shrink-0 text-xl">📅</span>
                   <p className="text-sm text-gray-700">
                     Run audits monthly to track spending changes over time
                   </p>
                 </li>
                 <li className="flex gap-3">
-                  <span className="flex-shrink-0 text-xl">🔗</span>
+                  <span className="shrink-0 text-xl">🔗</span>
                   <p className="text-sm text-gray-700">
-                    Share your audit URL to get team feedback on recommendations
+                    Share your audit link with stakeholders for feedback
                   </p>
                 </li>
                 <li className="flex gap-3">
-                  <span className="flex-shrink-0 text-xl">⚡</span>
+                  <span className="shrink-0 text-xl">⚡</span>
                   <p className="text-sm text-gray-700">
                     Implement recommendations and re-run to measure real savings
                   </p>

@@ -9,7 +9,7 @@ export default function AuditPage({ audit, domain }) {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center px-6 py-10 bg-white rounded-3xl shadow-xl border border-gray-200">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Audit not found</h1>
-          <p className="text-gray-600 mb-8">This audit has been deleted or doesn't exist.</p>
+          <p className="text-gray-600 mb-8">This audit has been deleted or doesn&apos;t exist.</p>
           <Link href="/" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
             Run your own free audit
           </Link>
@@ -62,7 +62,7 @@ export default function AuditPage({ audit, domain }) {
                   Potential savings: <span className="text-white">${totalMonthlySavings.toLocaleString()}/month</span>
                 </h1>
                 <p className="text-xl text-green-100 mb-6">
-                  That's <span className="font-semibold">${totalAnnualSavings.toLocaleString()}/year</span> for your team of {teamSize}
+                  That&apos;s <span className="font-semibold">${totalAnnualSavings.toLocaleString()}/year</span> for your team of {teamSize}
                 </p>
                 <p className="max-w-2xl mx-auto text-sm md:text-base text-green-100/90">
                   This audit identifies cost-saving opportunities across your AI tool stack, with clear recommendations you can share with stakeholders.
@@ -253,6 +253,18 @@ function copyAuditLink(id) {
 
 export async function getServerSideProps({ params, req }) {
   const { id } = params;
+
+  // Enforce server-side auth: if there are no auth-related cookies, redirect to login
+  const cookieHeader = req.headers.cookie || '';
+  const hasAuthCookie = /supabase|sb-access-token|supabase-auth-token|sb:token|supabase.auth.token/i.test(cookieHeader);
+  if (!hasAuthCookie) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
 
   const protocol = req.headers['x-forwarded-proto'] || 'http';
   const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';

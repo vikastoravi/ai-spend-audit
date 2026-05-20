@@ -9,6 +9,20 @@ import {
 } from 'recharts'
 import Link from 'next/link'
 
+function CustomTooltip({ active, payload }) {
+  if (active && payload && payload.length) {
+    const value = payload[0].value
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="text-sm font-semibold text-green-600">
+          ${value.toLocaleString()}/month savings
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function SavingsChart({ audits = [] }) {
   // Process and sort audits by date
   const chartData = audits
@@ -25,21 +39,6 @@ export default function SavingsChart({ audits = [] }) {
       }
     })
 
-  // Custom tooltip formatter
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const value = payload[0].value
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="text-sm font-semibold text-green-600">
-            ${value.toLocaleString()}/month savings
-          </p>
-        </div>
-      )
-    }
-    return null
-  }
-
   // Custom Y-axis formatter
   const formatYAxis = (value) => {
     return `$${(value / 1000).toFixed(0)}k`
@@ -48,7 +47,7 @@ export default function SavingsChart({ audits = [] }) {
   // Empty state
   if (chartData.length < 2) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-8">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900">Savings Found Per Audit</h2>
@@ -75,12 +74,11 @@ export default function SavingsChart({ audits = [] }) {
           <p className="text-gray-500 text-center mb-6">
             Run at least 2 audits to see your savings trend
           </p>
-          <Link
-            href="/dashboard"
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-          >
-            Run New Audit
-          </Link>
+          <div className="text-center">
+            <Link href="/audit/new" className="text-green-600 font-medium hover:underline">
+              Run New Audit — start your first audit
+            </Link>
+          </div>
         </div>
       </div>
     )
