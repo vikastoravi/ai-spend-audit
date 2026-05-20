@@ -281,8 +281,8 @@ function copyAuditLink(id) {
 export async function getServerSideProps({ params, req }) {
   const { id } = params;
 
-  const protocol = req.headers['x-forwarded-proto'] || 'http';
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
+  const protocol = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') || 'ai-spend-audit-indol.vercel.app';
   const domain = `${protocol}://${host}`.replace(/^https?:\/\//, '');
 
   try {

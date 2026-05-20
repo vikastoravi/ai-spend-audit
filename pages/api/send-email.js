@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     }
 
     // Prepare email content
-    const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://ai-spend-audit-indol.vercel.app';
     const auditUrl = `${domain}/audit/${auditId}`;
     const companyDisplay = companyName || 'Valued Customer';
 
